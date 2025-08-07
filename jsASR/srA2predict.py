@@ -7,7 +7,7 @@ Created on Sun Jul 21 01:07:00 2019
 
 import numpy as np
 import tensorflow as tf
-from DataGenTimitTri import DataGeneratorTri
+from .DataGenTimitTri import DataGeneratorTri
 
 def predictPhonemeProbabilitiesNonCausalNN( filename_X = 'srA1_logp_combined_all.npy', filename_Y = 'Phonemes39consecutive.npy', model_name = 'srA2_d_14', data_split_factor = 0.9):
     ''' use data_split_factor = 0 for running the model on all data or evaluating a test set, and 0.9for evaluating a train+dev set '''  

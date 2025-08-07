@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 import sklearn
 from sklearn.metrics import confusion_matrix
-from DataGenTimit import DataGenerator
+from jsasr.DataGenTimit import DataGenerator
 
 num_timesteps = 50
 

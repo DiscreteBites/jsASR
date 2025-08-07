@@ -8,7 +8,7 @@ Created on Tue Jun  5 10:48:18 2018
 import numpy as np
 import tensorflow as tf
 import sklearn
-from DataGenTimitTri import DataGeneratorTri
+from .DataGenTimitTri import DataGeneratorTri
 
 def trainNonCausalNN( filename_X = 'srA1_logp_combined_all.npy', filename_Y = 'Phonemes39consecutive.npy', file_identifier_out = 'srA2_a', epochs_to_save = 1, epochs_total = 100, batch_size = 1024, reduce_factor = 1, load_model = None ): 
     X = np.load( filename_X )

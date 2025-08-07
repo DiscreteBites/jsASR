@@ -11,15 +11,11 @@ Created on Sun Apr 21 20:56:53 2019
 import numpy as np
 import pandas as pd
 import os
-import os.path
 import librosa
 from scipy.io import wavfile
 import sklearn
 
-import sys
-sys.path.insert(0, 'D:\\python\\')
 from myfft.FourierTransforms import AuditoryFeatures
-
 
 def getPhonemeDict( dir_data = 'D:\TIMIT\TRAIN' ):
     phonemes = set()

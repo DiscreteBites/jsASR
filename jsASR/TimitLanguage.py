@@ -7,7 +7,7 @@ Created on Mon Jul  8 23:13:04 2019
 
 import numpy as np
 from sklearn.preprocessing import normalize
-from TimitData import getNextLabel, getPreviousLabel, getIndexNonSa
+from .TimitData import getNextLabel, getPreviousLabel, getIndexNonSa
 import multiprocessing as mp
 import pickle
 

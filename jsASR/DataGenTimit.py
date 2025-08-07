@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 
 class DataGenerator(tf.keras.utils.Sequence):
-    ''' generate data from timit, indeces given separately to have possibility to ignore first n timesteps
+    ''' generate data from timit, indices given separately to have possibility to ignore first n timesteps
         out_dim: 0-th element is batch size further elements input dim of NN
         reduce_factor to use only a fraction of the data per (randomly shuffled) batch'''
     def __init__(self, idx, X, Y, out_dim=(64,128,2,192), shuffle=True, reduce_factor = 1, non_causal_steps = 0):

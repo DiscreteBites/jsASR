@@ -8,13 +8,13 @@ Created on Fri Jul 19 21:24:24 2019
 import numpy as np
 #import multiprocessing as mp
 import pickle
-from TimitData import savePhonemeInformation, getPhonemeDict, savePhonemeInformation39, savePhoneme39Dict, getPhonemeDict39,\
+from jsasr.TimitData import savePhonemeInformation, getPhonemeDict, savePhonemeInformation39, savePhoneme39Dict, getPhonemeDict39,\
     getIndexNonSa, saveStartIndices, saveAuditoryInformation, scaleAuditoryVariables, removeStartOfPhonemes # , saveMelInformation
-from srA1 import trainCausalNN
-from srA1predict import combineModelCausalNN
-from srA2 import trainNonCausalNN
-from srA2predict import predictPhonemeProbabilitiesNonCausalNN
-from TimitLanguage import getPhonemeTransitionP, getBiphoneme2PhonemeTransitionP, getTriphonemeStateTransitionP, getTriphonemeStartP, \
+from jsasr.srA1 import trainCausalNN
+from jsasr.srA1predict import combineModelCausalNN
+from jsasr.srA2 import trainNonCausalNN
+from jsasr.srA2predict import predictPhonemeProbabilitiesNonCausalNN
+from jsasr.TimitLanguage import getPhonemeTransitionP, getBiphoneme2PhonemeTransitionP, getTriphonemeStateTransitionP, getTriphonemeStartP, \
     getFullTriphonemeStartP, getPreviousTriphonemeStatesAndTransitionP, \
     ViterbiTriphonemeFromNN, ViterbiOutput2Phonemes, PhonemePerTimestep2Sequence, minimumEditDistance
 #import time

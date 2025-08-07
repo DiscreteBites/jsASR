@@ -8,7 +8,7 @@ Created on Tue Jun  5 10:48:18 2018
 import numpy as np
 import tensorflow as tf
 import sklearn
-from DataGenTimit import DataGenerator
+from .DataGenTimit import DataGenerator
 
 def trainCausalNN( filename_X = 'L_scaled.npy', filename_Y = 'Phonemes39consecutive.npy', filename_idx = 'Phonemes39_position_index.npy', file_identifier_out = 'srA1_a', epochs_to_save = 1, epochs_total = 100, batch_size = 1024, reduce_factor = 1, load_model = None ):
 

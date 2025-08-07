@@ -8,7 +8,7 @@ Created on Sat Jun 22 12:29:18 2019
 import numpy as np
 import tensorflow as tf
 import sklearn
-from DataGenTimit import DataGenerator
+from .DataGenTimit import DataGenerator
 
 def predictPhonemeProbabilitiesCausalNN( filename_X = 'L_scaled.npy', filename_Y = 'Phonemes39consecutive.npy', model_name = 'srA1_k_1', data_split_factor = 0.9):
     ''' data_split_factor = 0 to predict and store for all timesteps. set to 0.9 for evaluation of development set (and use X of train+dev set)

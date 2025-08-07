@@ -7,7 +7,7 @@ Created on Sat Jul  6 10:45:16 2019
 
 import numpy as np
 import tensorflow as tf
-from DataGenTimit import DataGenerator
+from .DataGenTimit import DataGenerator
 from TimitData import getNextLabel, getPreviousLabel
 
 class DataGeneratorTri(DataGenerator):
