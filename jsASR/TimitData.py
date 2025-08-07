@@ -11,11 +11,10 @@ Created on Sun Apr 21 20:56:53 2019
 import numpy as np
 import pandas as pd
 import os
-import librosa
+# import librosa
 from scipy.io import wavfile
-import sklearn
 
-from myfft.FourierTransforms import AuditoryFeatures
+# from myfft.FourierTransforms import AuditoryFeatures
 
 def getPhonemeDict( dir_data = 'D:\TIMIT\TRAIN' ):
     phonemes = set()
@@ -190,29 +189,29 @@ def savePhonemeInformation39():
     Y = Phoneme39ToConsecutive(Y)
     np.save('Phonemes39consecutive',Y)
     
-def saveAuditoryInformation( ms_per_seg, dir_data = 'D:\TIMIT\TRAIN', fs = 16000): # 2 ms, D:\matlab\TIMIT\TRAIN
-    win_length = 2 ** np.arange(6,12) # 64 to 2048
-    L  = np.empty([12000000, int(len(win_length)*(win_length[0]/2+1))],dtype = 'float32' )
-    CC = np.empty([12000000, int(len(win_length)*win_length[0]/2)],dtype = 'float32' )
-    num_data = 0
-    seg_size = round( ms_per_seg * fs / 1000 )                # step size: 2 * 16 = 32 samples
-    for dirpath, dirnames, filenames in os.walk( dir_data ):
-        for file in [f for f in filenames if f.endswith('.WAV')]:
-            print(file + ' ' + str(num_data))
-            s, fs = librosa.load(dirpath+'/'+file[:-4]+'.WAV',sr=None)
-            end   = len(s)
-            X_len_this  = int( np.floor(end/seg_size) )
-            s = np.r_[ np.zeros([win_length[-1]-seg_size,],dtype = 'float32'),s ]
-            for i in range( X_len_this ):
-                s_this         = s[i*seg_size:i*seg_size+win_length[-1]] # 2048 samples segment
-                L_this,CC_this = AuditoryFeatures( s_this, int(np.log2(win_length[-1])-np.log2(win_length[0])+1), fs ) # s_this, 6, 16000
-                L[num_data,]   = L_this
-                CC[num_data,]  = CC_this
-                num_data       += 1
-    L  = L[:num_data,]
-    CC = CC[:num_data,]
-    np.save('CC',CC)
-    np.save('L',L)
+# def saveAuditoryInformation( ms_per_seg, dir_data = 'D:\TIMIT\TRAIN', fs = 16000): # 2 ms, D:\matlab\TIMIT\TRAIN
+#     win_length = 2 ** np.arange(6,12) # 64 to 2048
+#     L  = np.empty([12000000, int(len(win_length)*(win_length[0]/2+1))],dtype = 'float32' )
+#     CC = np.empty([12000000, int(len(win_length)*win_length[0]/2)],dtype = 'float32' )
+#     num_data = 0
+#     seg_size = round( ms_per_seg * fs / 1000 )                # step size: 2 * 16 = 32 samples
+#     for dirpath, dirnames, filenames in os.walk( dir_data ):
+#         for file in [f for f in filenames if f.endswith('.WAV')]:
+#             print(file + ' ' + str(num_data))
+#             s, fs = librosa.load(dirpath+'/'+file[:-4]+'.WAV',sr=None)
+#             end   = len(s)
+#             X_len_this  = int( np.floor(end/seg_size) )
+#             s = np.r_[ np.zeros([win_length[-1]-seg_size,],dtype = 'float32'),s ]
+#             for i in range( X_len_this ):
+#                 s_this         = s[i*seg_size:i*seg_size+win_length[-1]] # 2048 samples segment
+#                 L_this,CC_this = AuditoryFeatures( s_this, int(np.log2(win_length[-1])-np.log2(win_length[0])+1), fs ) # s_this, 6, 16000
+#                 L[num_data,]   = L_this
+#                 CC[num_data,]  = CC_this
+#                 num_data       += 1
+#     L  = L[:num_data,]
+#     CC = CC[:num_data,]
+#     np.save('CC',CC)
+#     np.save('L',L)
     
 def AuditoryToFrame( name_in, name_out, frame_length=10 ):
     X  = np.load(name_in)
@@ -225,45 +224,45 @@ def AuditoryToFrame( name_in, name_out, frame_length=10 ):
         X2[i,:,:] = X_this
     np.save(name_out,X2)
                 
-def saveMelInformation( ms_per_seg, dir_data = 'D:\TIMIT\TRAIN', fs = 16000 ):
-    Smel = np.empty([12000000, 128],dtype = 'float32' )
-    MFCC = np.empty([12000000, 20],dtype = 'float32' )
-    win_length = 512
-    num_data = 0
-    seg_size = round( ms_per_seg * fs / 1000 )
-    for dirpath, dirnames, filenames in os.walk( dir_data ):
-        for file in [f for f in filenames if f.endswith('.WAV')]:
-            print(file)
-            s, fs = librosa.load(dirpath+'/'+file[:-4]+'.WAV',sr=None)
-            end   = len(s)
-            X_len_this  = int( np.floor(end/seg_size) )
-            s = np.r_[ np.zeros([win_length-seg_size,],dtype = 'float32'),s ]
-            for i in range( X_len_this ):
-                s_this          = s[i*seg_size:i*seg_size+win_length]
-                Smel_this       = librosa.feature.melspectrogram(s_this, sr=fs, n_fft=win_length, hop_length=win_length*2, power=2.0, n_mels=128)
-                Smel_this       = Smel_this.reshape(128,)
-                MFCC_this       = librosa.feature.mfcc( sr=fs, S=librosa.power_to_db(Smel), n_mfcc=20, dct_type=2, norm='ortho' )
-                MFCC_this       = MFCC_this.reshape(20,)
-                Smel[num_data,] = Smel_this
-                MFCC[num_data,] = MFCC_this
-                num_data       += 1
-    Smel = Smel[:num_data,]
-    MFCC = MFCC[:num_data,]
-    np.save('Smel',Smel)
-    np.save('MFCC',MFCC)
+# def saveMelInformation( ms_per_seg, dir_data = 'D:\TIMIT\TRAIN', fs = 16000 ):
+#     Smel = np.empty([12000000, 128],dtype = 'float32' )
+#     MFCC = np.empty([12000000, 20],dtype = 'float32' )
+#     win_length = 512
+#     num_data = 0
+#     seg_size = round( ms_per_seg * fs / 1000 )
+#     for dirpath, dirnames, filenames in os.walk( dir_data ):
+#         for file in [f for f in filenames if f.endswith('.WAV')]:
+#             print(file)
+#             s, fs = librosa.load(dirpath+'/'+file[:-4]+'.WAV',sr=None)
+#             end   = len(s)
+#             X_len_this  = int( np.floor(end/seg_size) )
+#             s = np.r_[ np.zeros([win_length-seg_size,],dtype = 'float32'),s ]
+#             for i in range( X_len_this ):
+#                 s_this          = s[i*seg_size:i*seg_size+win_length]
+#                 Smel_this       = librosa.feature.melspectrogram(s_this, sr=fs, n_fft=win_length, hop_length=win_length*2, power=2.0, n_mels=128)
+#                 Smel_this       = Smel_this.reshape(128,)
+#                 MFCC_this       = librosa.feature.mfcc( sr=fs, S=librosa.power_to_db(Smel), n_mfcc=20, dct_type=2, norm='ortho' )
+#                 MFCC_this       = MFCC_this.reshape(20,)
+#                 Smel[num_data,] = Smel_this
+#                 MFCC[num_data,] = MFCC_this
+#                 num_data       += 1
+#     Smel = Smel[:num_data,]
+#     MFCC = MFCC[:num_data,]
+#     np.save('Smel',Smel)
+#     np.save('MFCC',MFCC)
     
-def TotalDurationTimit( dir_data = 'D:\TIMIT\TRAIN', fs = 16000):
-    num_ms = 0
-    seg_size = round(  fs / 1000 )
-    for dirpath, dirnames, filenames in os.walk( dir_data ):
-        for file in [f for f in filenames if f.endswith('.WAV')]:
-            print(file)
-            s, fs = librosa.load(dirpath+'/'+file[:-4]+'.WAV',sr=None)
-            end   = len(s)
-            X_len_this  = int( np.floor(end/seg_size) )
-            num_ms += X_len_this
+# def TotalDurationTimit( dir_data = 'D:\TIMIT\TRAIN', fs = 16000):
+#     num_ms = 0
+#     seg_size = round(  fs / 1000 )
+#     for dirpath, dirnames, filenames in os.walk( dir_data ):
+#         for file in [f for f in filenames if f.endswith('.WAV')]:
+#             print(file)
+#             s, fs = librosa.load(dirpath+'/'+file[:-4]+'.WAV',sr=None)
+#             end   = len(s)
+#             X_len_this  = int( np.floor(end/seg_size) )
+#             num_ms += X_len_this
             
-    return num_ms
+#     return num_ms
 
 def saveStartIndices( ms_per_seg = 2, dir_data = 'D:\TIMIT\TRAIN', fs = 16000, split = 0.9 ):
     ''' vector with indices that indicate the start of a sentence, and type of sentence (SA,SI,SX) '''
@@ -333,14 +332,14 @@ def removeStartOfPhonemes(filename_Y,n):
     Y_pos = Y_pos[:int(max(Y_index))]
     np.save(filename_Y+'_position_index.npy',Y_pos)
     
-def scaleAuditoryVariables( filename_CC = 'CC.npy', filename_L = 'L.npy' ):
-    CC = np.load( filename_CC )
-    CC = sklearn.preprocessing.scale(CC)
-    np.save('CC_scaled',CC)
-    del CC
-    L = np.load( filename_L)
-    L = sklearn.preprocessing.scale(L)
-    np.save('L_scaled',L)
+# def scaleAuditoryVariables( filename_CC = 'CC.npy', filename_L = 'L.npy' ):
+#     CC = np.load( filename_CC )
+#     CC = sklearn.preprocessing.scale(CC)
+#     np.save('CC_scaled',CC)
+#     del CC
+#     L = np.load( filename_L)
+#     L = sklearn.preprocessing.scale(L)
+#     np.save('L_scaled',L)
     
 def getTimeOffsetLabel(Y,offset=0):
     if offset == 0:

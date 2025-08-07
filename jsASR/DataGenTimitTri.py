@@ -8,7 +8,7 @@ Created on Sat Jul  6 10:45:16 2019
 import numpy as np
 import tensorflow as tf
 from .DataGenTimit import DataGenerator
-from TimitData import getNextLabel, getPreviousLabel
+from .TimitData import getNextLabel, getPreviousLabel
 
 class DataGeneratorTri(DataGenerator):
     ''' generate data from timit, indeces given separately to have possibility to ignore first n timesteps

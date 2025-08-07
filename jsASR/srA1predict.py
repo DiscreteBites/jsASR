@@ -4,10 +4,12 @@ Created on Sat Jun 22 12:29:18 2019
 
 @author: js2251
 """
-
+from typing import cast
 import numpy as np
+
 import tensorflow as tf
-import sklearn
+from keras.models import Model
+
 from .DataGenTimit import DataGenerator
 
 def predictPhonemeProbabilitiesCausalNN( filename_X = 'L_scaled.npy', filename_Y = 'Phonemes39consecutive.npy', model_name = 'srA1_k_1', data_split_factor = 0.9):
@@ -27,8 +29,7 @@ def predictPhonemeProbabilitiesCausalNN( filename_X = 'L_scaled.npy', filename_Y
     idx_val   = idx[data_split:]
     
     predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)
-    
-    model=tf.keras.models.load_model( model_name +'.h5')
+    model = cast(Model, tf.keras.models.load_model( model_name +'.h5'))
     
     evaluation = model.evaluate_generator( predict_generator, verbose = 1 )
     

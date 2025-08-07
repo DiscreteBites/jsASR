@@ -4,9 +4,13 @@ Created on Sun Jul 21 01:07:00 2019
 
 @author: js2251
 """
+from typing import cast
 
 import numpy as np
+
 import tensorflow as tf
+from keras.models import Model
+
 from .DataGenTimitTri import DataGeneratorTri
 
 def predictPhonemeProbabilitiesNonCausalNN( filename_X = 'srA1_logp_combined_all.npy', filename_Y = 'Phonemes39consecutive.npy', model_name = 'srA2_d_14', data_split_factor = 0.9):
@@ -27,12 +31,10 @@ def predictPhonemeProbabilitiesNonCausalNN( filename_X = 'srA1_logp_combined_all
     data_split = int( data_split_factor * len(idx))
     idx_val   = idx[data_split:]
     
-    model=tf.keras.models.load_model( model_name + '.h5')
+    model = cast(Model, tf.keras.models.load_model( model_name + '.h5'))
     
     predict_generator = DataGeneratorTri(idx_val, X, Y, dim, reduce_factor = 1,non_causal_steps = int(num_timesteps/2), shuffle = False)
-    
     evaluation = model.evaluate_generator( predict_generator, verbose = 1 )
-    
     p = model.predict_generator( predict_generator, verbose = 1 )
     
     p_prev = p[0]

@@ -20,9 +20,11 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.time_dim = tuple(out_dim[1:-1])
         self.out_dim_nobatch = tuple(out_dim[1:])
         self.num_time_steps = 1
+
         for i in range(1,len(out_dim)-1):
             self.num_time_steps *= out_dim[i]
-#        self.num_classes = int( max( Y ) + 1 )
+            #self.num_classes = int( max( Y ) + 1 )
+
         self.num_classes = len(set(Y)) #int( max( Y ) + 1 )
         self.shuffle = shuffle
         self.idx = idx[ int(self.num_time_steps): ]
@@ -36,7 +38,7 @@ class DataGenerator(tf.keras.utils.Sequence):
 
     def __getitem__(self, index):       
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size] # Generate indexes of the batch        
-        list_idx_temp = [self.idx[k] for k in indexes] # Find list of IDs
+        list_idx_temp = [self.idx[k] for k in indexes if k != -1] # Find list of IDs
         X, Y = self.__data_generation(list_idx_temp)
         return X, Y
 
@@ -53,11 +55,20 @@ class DataGenerator(tf.keras.utils.Sequence):
         Y = np.empty((self.batch_size), dtype=int)
 
         for i, ID in enumerate(list_idx_temp):
-            X[i,] = self.X[ ID-self.num_time_steps+1:ID+1,  ].reshape( self.out_dim_nobatch )
-            Y[i] = self.Y[ID-self.non_causal_steps]
+            label = self.Y[ID-self.non_causal_steps]
+            #skip silent (unlabeled) frames
+            if label == -1:
+                continue
 
-        return X, tf.keras.utils.to_categorical(Y, num_classes=self.num_classes)
-    
+            X[i,] = self.X[ ID-self.num_time_steps+1:ID+1,  ].reshape( self.out_dim_nobatch )
+            Y[i] = label
+
+        if np.any(Y < 0):
+            raise ValueError("Found negative labels in batch. Silence was not skipped?")
+
+        return X, Y # tensorflow behaviour for class weights updated 
+        # return X, tf.keras.utils.to_categorical(Y, num_classes=self.num_classes)
+
 class PredictGenerator( DataGenerator ):
     
     def __init__(self, **kwargs):

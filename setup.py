@@ -15,7 +15,7 @@ setup(
 	packages=find_packages(),
 	install_requires=[
 		"tensorflow==2.10",        # Last version supporting non-Python 3.11+ issues
-		"scikit-learn>=1.1,<1.3",  # Recent, stable
+		"scikit-learn>=1.1,<1.3",  
 		"numpy>=1.21,<1.24",       
 		"scipy>=1.7,<1.10",        # Required by TF and sklearn
 		"h5py<3.8",                # TensorFlow 2.10 requirement
