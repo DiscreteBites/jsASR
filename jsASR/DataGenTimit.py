@@ -12,7 +12,12 @@ class DataGenerator(tf.keras.utils.Sequence):
     ''' generate data from timit, indices given separately to have possibility to ignore first n timesteps
         out_dim: 0-th element is batch size further elements input dim of NN
         reduce_factor to use only a fraction of the data per (randomly shuffled) batch'''
-    def __init__(self, idx, X, Y, out_dim=(64,128,2,192), shuffle=True, reduce_factor = 1, non_causal_steps = 0):
+    def __init__(self, idx, X, Y, out_dim=(64,128,2,192), 
+        shuffle=True, reduce_factor = 1, non_causal_steps = 0,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+
         self.X = X
         self.Y = Y
         self.out_dim = out_dim
@@ -31,7 +36,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.non_causal_steps = non_causal_steps
         self.reduce_factor = reduce_factor
         self.on_epoch_end()        
-
+    
     def __len__(self):
         ''' batches per epoch '''
         return int(np.floor(len(self.idx) / self.batch_size / self.reduce_factor))
@@ -51,23 +56,31 @@ class DataGenerator(tf.keras.utils.Sequence):
     def __data_generation(self, list_idx_temp):
         'Generates data containing batch_size samples' # X : (n_samples, *dim)
 
-        X = np.empty(self.out_dim)
-        Y = np.empty((self.batch_size), dtype=int)
+        # Preallocate max size, then fill only when label != -1
+        X = np.empty(self.out_dim)                # (batch, *dims)
+        Y = np.empty((self.batch_size,), dtype=int)
 
-        for i, ID in enumerate(list_idx_temp):
-            label = self.Y[ID-self.non_causal_steps]
-            #skip silent (unlabeled) frames
+        w = 0  # write pointer
+        for ID in list_idx_temp:
+            label = self.Y[ID - self.non_causal_steps]
             if label == -1:
                 continue
 
-            X[i,] = self.X[ ID-self.num_time_steps+1:ID+1,  ].reshape( self.out_dim_nobatch )
-            Y[i] = label
+            X[w] = self.X[ID - self.num_time_steps + 1 : ID + 1].reshape(self.out_dim_nobatch)
+            Y[w] = label
+            w += 1
 
-        if np.any(Y < 0):
-            raise ValueError("Found negative labels in batch. Silence was not skipped?")
+        if w == 0:
+            raise ValueError("Batch has only silence. Need to resample indices.")
 
-        return X, Y # tensorflow behaviour for class weights updated 
-        # return X, tf.keras.utils.to_categorical(Y, num_classes=self.num_classes)
+        # Trim to the number of valid samples
+        X = X[:w]
+        Y = Y[:w]
+
+        # Safety: no negatives remain
+        assert not np.any(Y < 0)
+        
+        return X, Y
 
 class PredictGenerator( DataGenerator ):
     
