@@ -40,5 +40,15 @@ setup(
 		'pyprojroot>=0.3.0',
         'tqdm>=4.66.0'
 	],
+	extras_require={
+		"dev": [
+            "black", 
+            "ruff", 
+            "pytest",
+            "notebook", 
+            "ipykernel",
+            "pympler"
+        ]
+	},
 	python_requires=">=3.10,<3.12"
 )
