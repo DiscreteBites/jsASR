@@ -1,4 +1,4 @@
-name: jsasr
+name: jsasr-dev
 
 channels:
   - conda-forge
