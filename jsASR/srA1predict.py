@@ -12,7 +12,7 @@ from keras.models import Model
 
 from .DataGenTimit import DataGenerator
 
-def predictPhonemeProbabilitiesCausalNN( filename_X = 'L_scaled.npy', filename_Y = 'Phonemes39consecutive.npy', model_name = 'srA1_k_1', data_split_factor = 0.9):
+def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model_name = 'srA1_k_1', data_split_factor = 0.9):
     ''' data_split_factor = 0 to predict and store for all timesteps. set to 0.9 for evaluation of development set (and use X of train+dev set)
         see also srA1eval script for evaluation purposes '''
     X = np.load( filename_X )
@@ -29,7 +29,7 @@ def predictPhonemeProbabilitiesCausalNN( filename_X = 'L_scaled.npy', filename_Y
     idx_val   = idx[data_split:]
     
     predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)
-    model = cast(Model, tf.keras.models.load_model( model_name +'.h5'))
+    model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
     
     evaluation = model.evaluate_generator( predict_generator, verbose = 1 )
     
@@ -50,7 +50,7 @@ def predictPhonemeProbabilitiesCausalNN( filename_X = 'L_scaled.npy', filename_Y
 
 ######### combine
     
-def combineModelCausalNN( model_name_1 = 'srA1_k_1', model_name_2 = 'srA1_h_0', model_name_out = 'srA1', filename_X1 = 'L_scaled.npy', filename_X2 = 'CC_scaled.npy', filename_Y = 'Phonemes39consecutive.npy' ):
+def combineModelCausalNN( filename_X1: str, filename_X2: str, filename_Y: str, model_name_1 = 'srA1_k_1', model_name_2 = 'srA1_h_0', model_name_out = 'srA1'):
     ''' combine models based on level and cepstral coefficients (or any two models) by adding their log probabilities '''
 
     predictPhonemeProbabilitiesCausalNN( filename_X = filename_X1, filename_Y = filename_Y, model_name = model_name_1, data_split_factor = 0)

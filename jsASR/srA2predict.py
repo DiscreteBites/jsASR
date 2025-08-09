@@ -13,7 +13,7 @@ from keras.models import Model
 
 from .DataGenTimitTri import DataGeneratorTri
 
-def predictPhonemeProbabilitiesNonCausalNN( filename_X = 'srA1_logp_combined_all.npy', filename_Y = 'Phonemes39consecutive.npy', model_name = 'srA2_d_14', data_split_factor = 0.9):
+def predictPhonemeProbabilitiesNonCausalNN( filename_X: str, filename_Y: str, model_name = 'srA2_d_14', data_split_factor = 0.9):
     ''' use data_split_factor = 0 for running the model on all data or evaluating a test set, and 0.9for evaluating a train+dev set '''  
 
     X = np.load(filename_X)
@@ -31,7 +31,7 @@ def predictPhonemeProbabilitiesNonCausalNN( filename_X = 'srA1_logp_combined_all
     data_split = int( data_split_factor * len(idx))
     idx_val   = idx[data_split:]
     
-    model = cast(Model, tf.keras.models.load_model( model_name + '.h5'))
+    model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
     
     predict_generator = DataGeneratorTri(idx_val, X, Y, dim, reduce_factor = 1,non_causal_steps = int(num_timesteps/2), shuffle = False)
     evaluation = model.evaluate_generator( predict_generator, verbose = 1 )
