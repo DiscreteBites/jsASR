@@ -28,15 +28,17 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
     data_split = int( data_split_factor * len(idx))
     idx_val   = idx[data_split:]
     
-    predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)
     model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
-    
-    evaluation = model.evaluate_generator( predict_generator, verbose = 1 )
-    
-    p = model.predict_generator( predict_generator, verbose = 1 )
+
+    predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)    
+    evaluation = model.evaluate(predict_generator, verbose="1", return_dict=True)
+    p = model.predict(predict_generator, verbose="1")
+
     idx_valed = np.array(idx_val)[np.array(range(len(p)))] + num_timesteps
-    
-    logp = np.log(p)
+
+    # safe log
+    eps = 1e-12
+    logp = np.log(np.clip(p, eps, 1.0))
     np.save( model_name+'_logp.npy',logp)
     
     y_pred = np.argmax(p,axis=1)
