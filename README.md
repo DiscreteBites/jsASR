@@ -1,4 +1,8 @@
 # ASRbasic
+
+This package was originally authored by Josef Schlittenlacher.
+It has been updated and is currently maintained by Marcus Ng.
+
 A lightweight ASR system to compute phoneme errors on a corpus such as Timit.\
 The intention of this software was to analyse (automatic) speech recognition for degraded input signals or degraded features, i.e. focusing on the confusion of phonemes at frame level. For this reason, the features are somewhat different from the more typical Mel-scale features. Adaption to other input features is straightforward.
 

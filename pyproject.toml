@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jsASR"
+version = "0.1.0"
+description = "A lightweight ASR system to compute phoneme errors on a corpus such as Timit"
+authors = [
+	{ name = "Josef Schlittenlacher" }
+]
+maintainers = [
+	{ name = "Marcus Ng", email = "marcusngzhijie@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+	'python-dotenv>=1.1.1',
+	'pandas>=2.3.1,<3.0.0',
+	'seaborn>=0.13.2,<0.14.0',
+	'bidict>=0.23.1',
+	'pyprojroot>=0.3.0',
+	'tqdm>=4.66.0'
+]
+
+[project.optional-dependencies]
+cpu = [
+    # ===== TF 2.10 compatible pins =====
+	'tensorflow==2.10.* ; python_version < "3.11"',	
+	'numpy>=1.21,<1.24',
+	'scipy>=1.7,<1.10',
+	'h5py<3.8',
+	'scikit-learn>=1.1,<1.3',
+]
+
+cuda = [
+    # ===== TF 2.17 compatible pins =====
+    'tensorflow[and-cuda]==2.17.*',
+    'numpy>=1.26,<2.0',
+	'scipy>=1.10,<1.14',
+	'h5py>=3.10',
+	'scikit-learn>=1.5,<1.6',
+]
+
+dev = [
+	"black",
+	"ruff",
+	"pytest",
+	"notebook",
+	"ipykernel",
+	"pympler"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["jsASR*"]  # ["*"] by default
