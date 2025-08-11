@@ -5,6 +5,7 @@ Created on Sat Jun 22 12:29:18 2019
 @author: js2251
 """
 from typing import cast
+
 import numpy as np
 
 import tensorflow as tf
@@ -17,8 +18,10 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
         see also srA1eval script for evaluation purposes '''
     X = np.load( filename_X )
     Y = np.load( filename_Y )
-    idx = np.arange(len(X))   # predict all including first after phoneme boundary
-    idx = idx.reshape(idx.shape[0],)
+    
+    # note that where Y == -1 no phoneme label is given "silence"
+    # predict all including first after phoneme boundary
+    idx = np.flatnonzero(Y > -1)
     
     num_timesteps = 50
     batch_size    = 1024
@@ -30,7 +33,7 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
     
     model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
 
-    predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)    
+    predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)
     evaluation = model.evaluate(predict_generator, verbose="1", return_dict=True)
     p = model.predict(predict_generator, verbose="1")
 
@@ -39,13 +42,13 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
     # safe log
     eps = 1e-12
     logp = np.log(np.clip(p, eps, 1.0))
-    np.save( model_name+'_logp.npy',logp)
+    np.save( model_name + '_logp.npy', logp)
     
     y_pred = np.argmax(p,axis=1)
     y_true = Y[idx_valed]
     pred_correct = sum( ( np.logical_or( y_pred[:-8] == y_true[:-8], y_pred[8:] == y_true[:-8]  ) ) ) / (len(y_pred)-8)
-    np.save('Phonemes39pred_' + model_name + '.npy',y_pred)
-    np.save('Phonemes39true.npy',y_true)
+    np.save( model_name + '_Phonemes39_pred.npy', y_pred)
+    np.save( model_name + '_Phonemes39_true.npy',y_true)
     
     print(evaluation[1])
     print(pred_correct)

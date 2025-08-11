@@ -59,7 +59,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         # Preallocate max size, then fill only when label != -1
         X = np.empty(self.out_dim)                # (batch, *dims)
         Y = np.empty((self.batch_size,), dtype=int)
-
+        
         w = 0  # write pointer
         for ID in list_idx_temp:
             label = self.Y[ID - self.non_causal_steps]

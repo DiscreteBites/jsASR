@@ -19,9 +19,10 @@ def predictPhonemeProbabilitiesNonCausalNN( filename_X: str, filename_Y: str, mo
     X = np.load(filename_X)
     Y = np.load(filename_Y)
     Y = Y[50:]   # 50 timesteps in first causal NN
-    idx = np.arange(len(X))   # predict all including first after phoneme border
-    
-    idx = idx.reshape(idx.shape[0],)
+
+    # note that where Y == -1 no phoneme label is given "silence"
+    # predict all including first after phoneme boundary
+    idx = np.flatnonzero(Y > -1)
     
     batch_size   = 1024
     num_features = X.shape[1]
@@ -49,8 +50,8 @@ def predictPhonemeProbabilitiesNonCausalNN( filename_X: str, filename_Y: str, mo
     y_pred = np.argmax(p_now,axis=1)
     y_true = Y[idx_valed]
     pred_correct = sum( ( np.logical_or( y_pred[:-8] == y_true[:-8], y_pred[8:] == y_true[:-8]  ) ) ) / (len(y_pred)-8)
-    np.save('Phonemes39pred_' + model_name + '.npy',y_pred)
-    np.save('Phonemes39true_' + model_name + '.npy',y_true) # difference to causal NN: first 50 were discarded
+    np.save( model_name + '_Phonemes39_pred.npy', y_pred)
+    np.save( model_name + '_Phonemes39_true.npy',y_true)
     
     print(evaluation[4:])
     print(pred_correct)
