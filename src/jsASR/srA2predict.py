@@ -53,5 +53,5 @@ def predictPhonemeProbabilitiesNonCausalNN( filename_X: str, filename_Y: str, mo
     np.save( model_name + '_Phonemes39_pred.npy', y_pred)
     np.save( model_name + '_Phonemes39_true.npy',y_true)
     
-    print(evaluation[4:])
+    print(evaluation)
     print(pred_correct)

@@ -50,10 +50,8 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
     np.save( model_name + '_Phonemes39_pred.npy', y_pred)
     np.save( model_name + '_Phonemes39_true.npy',y_true)
     
-    print(evaluation[1])
+    print(evaluation)   
     print(pred_correct)
-
-######### combine
     
 def combineModelCausalNN( filename_X1: str, filename_X2: str, filename_Y: str, model_name_1 = 'srA1_k_1', model_name_2 = 'srA1_h_0', model_name_out = 'srA1'):
     ''' combine models based on level and cepstral coefficients (or any two models) by adding their log probabilities '''
