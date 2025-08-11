@@ -31,6 +31,7 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
     data_split = int( data_split_factor * len(idx))
     idx_val   = idx[data_split:]
     
+    print('evaluating and predicting... this will take a while')
     model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
 
     predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)
@@ -62,5 +63,5 @@ def combineModelCausalNN( filename_X1: str, filename_X2: str, filename_Y: str, m
     logp_2  = np.load( model_name_2 + '_logp.npy')
     
     logp = logp_1 + logp_2
-    np.save( model_name_out + '_logp_combined_all.npy',logp)
-    np.save( model_name_out + '_p_combined_all.npy',np.exp(logp))
+    np.save( model_name_out + '_logp_combined_all.npy', logp)
+    np.save( model_name_out + '_p_combined_all.npy', np.exp(logp))

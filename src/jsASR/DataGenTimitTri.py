@@ -40,34 +40,17 @@ class DataGeneratorTri(DataGenerator):
         Y_now = np.empty((self.batch_size), dtype=int)
         Y_prev = np.empty((self.batch_size), dtype=int)
         Y_next = np.empty((self.batch_size), dtype=int)
-
-        w = 0  # write pointer
-        for ID in list_idx_temp:
-            label_now = self.Y[ID - self.non_causal_steps]
-            if label_now == -1:
-                continue  # skip silent frames based on "now" label (to mirror causal)
-
-            # slice input window
-            X[w] = self.X[ID - self.num_time_steps + 1 : ID + 1].reshape(self.out_dim_nobatch)
-
-            # gather labels
-            Y_now[w]  = label_now
-            Y_prev[w] = self.Y_prev[ID - self.non_causal_steps]
-            Y_next[w] = self.Y_next[ID - self.non_causal_steps]
-            w += 1
-
-        if w == 0:
-            raise ValueError("Batch has only silence. Need to resample indices.")
-
-        # Trim to actual filled size
-        X = X[:w]
-        Y_prev = Y_prev[:w]
-        Y_now  = Y_now[:w]
-        Y_next = Y_next[:w]
+        
+        for i, ID in enumerate(list_idx_temp):
+            X[i,] = self.X[ID - self.num_time_steps + 1 : ID + 1].reshape(self.out_dim_nobatch)
+            
+            Y_now[i]  = self.Y[ID - self.non_causal_steps]
+            Y_prev[i] = self.Y_prev[ID - self.non_causal_steps]
+            Y_next[i] = self.Y_next[ID - self.non_causal_steps]
         
         # Safety: no negatives remain (if prev/next can be -1 too, switch to assert on all three)
-        assert not np.any(Y_now  < 0), "Negative 'now' labels found"
-        assert not np.any(Y_prev < 0), "Negative 'prev' labels found"
-        assert not np.any(Y_next < 0), "Negative 'next' labels found"
+        assert not np.any(Y_now  < 0), "unlabeled phonemes present in 'now'"
+        assert not np.any(Y_prev < 0), "unlabeled phonemes present in 'prev'"
+        assert not np.any(Y_next < 0), "unlabeled phonemes present in 'next'"
 
         return X, [Y_prev, Y_now, Y_next]

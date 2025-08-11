@@ -30,14 +30,14 @@ def trainNonCausalNN(
     Y = Y[50:]   # 50 timesteps in first causal NN
     idx = np.arange(len(X))   # predict all including first after phoneme border
     
-    # Sanitize silent frames
-    Y_clean = Y[Y != -1]
-
-    classes = np.array([int(c) for c in np.unique(Y_clean)])
+    # Check for silent frames
+    assert not np.any(Y < 0), "unlabeled phonemes present" 
+    
+    classes = np.array([int(c) for c in np.unique(Y)])
     weights = compute_class_weight(
         class_weight = 'balanced',
         classes = classes,
-        y=Y_clean
+        y=Y
     )
     
     # Three head class heads

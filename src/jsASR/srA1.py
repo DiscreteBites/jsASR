@@ -29,14 +29,14 @@ def trainCausalNN(
     Y: ndarray = np.load( filename_Y )
     idx: ndarray = np.load( filename_idx )
     
-    # Sanitize silent frames
-    Y_clean = Y[Y != -1]
+    # Check for silent frames
+    assert not np.any(Y < 0), "unlabeled phonemes present" 
 
-    classes = np.array([int(c) for c in np.unique(Y_clean)])
+    classes = np.array([int(c) for c in np.unique(Y)])
     weights = compute_class_weight(
         class_weight = 'balanced',
         classes = classes,
-        y=Y_clean
+        y=Y
     )
     class_weight = dict(zip(classes, weights))
     idx = idx.reshape(idx.shape[0],)

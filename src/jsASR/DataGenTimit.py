@@ -59,26 +59,13 @@ class DataGenerator(tf.keras.utils.Sequence):
         # Preallocate max size, then fill only when label != -1
         X = np.empty(self.out_dim)                # (batch, *dims)
         Y = np.empty((self.batch_size,), dtype=int)
+
+        for i, ID in enumerate(list_idx_temp):            
+            X[i,] = self.X[ID - self.num_time_steps + 1 : ID + 1].reshape(self.out_dim_nobatch)
+            Y[i] = self.Y[ID - self.non_causal_steps]
         
-        w = 0  # write pointer
-        for ID in list_idx_temp:
-            label = self.Y[ID - self.non_causal_steps]
-            if label == -1:
-                continue
-
-            X[w] = self.X[ID - self.num_time_steps + 1 : ID + 1].reshape(self.out_dim_nobatch)
-            Y[w] = label
-            w += 1
-
-        if w == 0:
-            raise ValueError("Batch has only silence. Need to resample indices.")
-
-        # Trim to the number of valid samples
-        X = X[:w]
-        Y = Y[:w]
-
-        # Safety: no negatives remain
-        assert not np.any(Y < 0)
+        # check no negatives in batch
+        assert not np.any(Y < 0), "unlabeled phonemes present"
         
         return X, Y
 
