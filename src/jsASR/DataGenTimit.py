@@ -5,6 +5,9 @@ Created on Fri Feb 15 23:36:50 2019
 @author: js2251
 """
 
+from typing import Tuple, Any
+from numpy.typing import NDArray
+
 import numpy as np
 import tensorflow as tf
 
@@ -40,8 +43,8 @@ class DataGenerator(tf.keras.utils.Sequence):
     def __len__(self):
         ''' batches per epoch '''
         return int(np.floor(len(self.idx) / self.batch_size / self.reduce_factor))
-
-    def __getitem__(self, index):       
+    
+    def __getitem__(self, index) -> Tuple[NDArray[Any], NDArray[Any] | list[NDArray[Any]]]:       
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size] # Generate indexes of the batch        
         list_idx_temp = [self.idx[k] for k in indexes if k != -1] # Find list of IDs
         X, Y = self.__data_generation(list_idx_temp)
@@ -63,7 +66,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         for i, ID in enumerate(list_idx_temp):            
             X[i,] = self.X[ID - self.num_time_steps + 1 : ID + 1].reshape(self.out_dim_nobatch)
             Y[i] = self.Y[ID - self.non_causal_steps]
-        
+
         # check no negatives in batch
         assert not np.any(Y < 0), "unlabeled phonemes present"
         
