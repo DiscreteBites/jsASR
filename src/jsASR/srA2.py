@@ -42,7 +42,11 @@ def trainNonCausalNN(
     
     # Three head class heads
     cw_dict = dict(zip(classes, weights))
-    class_weight = [cw_dict, cw_dict, cw_dict]
+    class_weight = {
+        "out_prev2": cw_dict, 
+        "out_now2": cw_dict, 
+        "out_next2": cw_dict
+    }
 
     idx = idx.reshape(idx.shape[0],)
     
