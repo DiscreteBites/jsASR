@@ -9,7 +9,7 @@ from typing import cast
 import numpy as np
 
 import tensorflow as tf
-from keras.models import Model
+Model = tf.keras.Model
 
 from .DataGenTimit import DataGenerator
 
@@ -32,7 +32,7 @@ def predictPhonemeProbabilitiesCausalNN( filename_X: str, filename_Y: str, model
     idx_val   = idx[data_split:]
     
     print('evaluating and predicting... this will take a while')
-    model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
+    model = cast(Model, Model.load_model( model_name + '.keras'))
 
     predict_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = 1, shuffle = False)
     evaluation = model.evaluate(predict_generator, verbose="1", return_dict=True)

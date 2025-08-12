@@ -9,7 +9,7 @@ from typing import cast
 import numpy as np
 
 import tensorflow as tf
-from keras.models import Model
+Model = tf.keras.Model
 
 from .DataGenTimitTri import DataGeneratorTri
 

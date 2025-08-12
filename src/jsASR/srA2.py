@@ -8,13 +8,12 @@ from typing import cast
 
 import pandas as pd 
 import numpy as np
-from numpy import ndarray
 
 import tensorflow as tf
-from keras.models import Model
+from keras import Model
 from keras.callbacks import History
 from tqdm.keras import TqdmCallback
-
+ 
 from sklearn.utils import compute_class_weight
 from .DataGenTimitTri import DataGeneratorTri
 from .logging import print_histories
@@ -29,7 +28,7 @@ def trainNonCausalNN(
     Y = np.load( filename_Y )
     Y = Y[50:]   # 50 timesteps in first causal NN
     idx = np.arange(len(X))   # predict all including first after phoneme border
-    
+
     # Check for silent frames
     assert not np.any(Y < 0), "unlabeled phonemes present" 
     
@@ -39,15 +38,7 @@ def trainNonCausalNN(
         classes = classes,
         y=Y
     )
-    
-    # Three head class heads
     cw_dict = dict(zip(classes, weights))
-    class_weight = {
-        "out_prev2": cw_dict, 
-        "out_now2": cw_dict, 
-        "out_next2": cw_dict
-    }
-
     idx = idx.reshape(idx.shape[0],)
     
     num_features  = X.shape[1]
@@ -68,37 +59,44 @@ def trainNonCausalNN(
     x = tf.keras.layers.Bidirectional( tf.keras.layers.GRU( 128, return_sequences=True, trainable = True ), name = "gru1" )(x) # , kernel_regularizer=tf.keras.regularizers.l2(0.01)
     x = tf.keras.layers.Bidirectional( tf.keras.layers.GRU( 128  ), name = "gru2", trainable = True )(x) # , recurrent_dropout=0.2
     
-    out1 = tf.keras.layers.Dense( 40, activation='softmax', name = "out_prev2"  )(x)
+    out1 = tf.keras.layers.Dense( 40, activation='softmax', name = "out_prev2" )(x)
     out2 = tf.keras.layers.Dense( 40, activation='softmax', name = "out_now2"  )(x)
-    out3 = tf.keras.layers.Dense( 40, activation='softmax', name = "out_next2"  )(x)
+    out3 = tf.keras.layers.Dense( 40, activation='softmax', name = "out_next2" )(x)
     
-    model: Model = tf.keras.Model(inputs=inp, outputs=[out1,out2,out3])
-    
+    model: Model = Model(inputs=inp, outputs=[out1,out2,out3])
     if load_model is not None:
             model = cast(Model, tf.keras.models.load_model( load_model )) # start from a previously saved model, discard model that was just compiled
         
     #tf.keras.utils.plot_model(model,show_shapes=True, to_file='model_bidirectional.png')
     
-    model.compile(loss='sparse_categorical_crossentropy', # using the cross-entropy loss function
-                  optimizer='adam', # using the Adam optimiser
-                  metrics=['sparse_categorical_accuracy']) # reporting the accuracy
+    model.compile(
+        optimizer="adam",
+        loss = [ "sparse_categorical_crossentropy" ] *3,
+        metrics = [ ["sparse_categorical_accuracy"] ] *3
+    )
     
-    training_generator = DataGeneratorTri(idx_train, X, Y, dim, reduce_factor = reduce_factor,non_causal_steps = int(num_timesteps/2))
-    validation_generator = DataGeneratorTri(idx_val, X, Y, dim, reduce_factor = reduce_factor,non_causal_steps = int(num_timesteps/2))
+    training_generator = DataGeneratorTri(
+        idx=idx_train, X=X, Y=Y, out_dim=dim, cw_dict=cw_dict, 
+        reduce_factor = reduce_factor, non_causal_steps = int(num_timesteps/2)
+    )
+    validation_generator = DataGeneratorTri(
+        idx=idx_val, X=X, Y=Y, out_dim=dim, cw_dict=cw_dict, 
+        reduce_factor = reduce_factor, non_causal_steps = int(num_timesteps/2)
+    )
     
     best_val = -float("inf")
     best_epoch = -1
     global_epoch = 0
-    val_key = "val_sparse_categorical_accuracy"
+    val_key = "val_out_now2_sparse_categorical_accuracy"
     all_histories = []
-
+    
     # Train model on dataset
     for i in range( int(epochs_total / epochs_to_save) ):
-         # callback to save every epoch with global epoch number
-        save_all = tf.keras.callbacks.ModelCheckpoint(
-            filepath=f"{file_identifier_out}_epoch{{epoch:04d}}.keras",
-            save_best_only=False
-        )
+        # callback to save every epoch with global epoch number
+        # save_all = tf.keras.callbacks.ModelCheckpoint(
+        #     filepath=f"{file_identifier_out}_epoch{{epoch:04d}}.keras",
+        #     save_best_only=False
+        # )
 
         # callback to save best model separately
         save_best = tf.keras.callbacks.ModelCheckpoint(
@@ -107,15 +105,14 @@ def trainNonCausalNN(
             mode="max",
             save_best_only=True
         )
-
+        
         h = cast(History, model.fit(
             x = training_generator,
             validation_data = validation_generator,
-            class_weight = class_weight,
             epochs=global_epoch + epochs_to_save,   # end epoch number (global)
             initial_epoch=global_epoch,             # start epoch number (global)
-            callbacks=[save_all, save_best, TqdmCallback(verbose=1)],
-            verbose="1"
+            callbacks=[save_best, TqdmCallback(verbose=1)],
+            verbose="0"
         ))
 
         # Track best val metric manually

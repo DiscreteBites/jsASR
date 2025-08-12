@@ -11,7 +11,7 @@ import numpy as np
 from numpy import ndarray
 
 import tensorflow as tf
-from keras.models import Model
+from keras import Model
 from keras.callbacks import History
 from tqdm.keras import TqdmCallback
 
@@ -64,8 +64,7 @@ def trainCausalNN(
     
     out = tf.keras.layers.Dense( 40, activation='softmax' )(x)
 
-    model: Model = tf.keras.Model(inputs=inp, outputs=out)
-
+    model: Model = Model(inputs=inp, outputs=out)
     if load_model is not None:
         model = cast(Model, tf.keras.models.load_model( load_model )) # start from a previously saved model, discard model that was just compiled
     
@@ -75,8 +74,14 @@ def trainCausalNN(
                   optimizer='adam', # using the Adam optimiser
                   metrics=['sparse_categorical_accuracy']) # reporting the accuracy
         
-    training_generator = DataGenerator(idx_train, X, Y, dim, reduce_factor = reduce_factor)
-    validation_generator = DataGenerator(idx_val, X, Y, dim, reduce_factor = reduce_factor)
+    training_generator = DataGenerator(
+        idx=idx_train, X=X, Y=Y, out_dim=dim, 
+        reduce_factor = reduce_factor
+    )
+    validation_generator = DataGenerator(
+        idx=idx_val, X=X, Y=Y, out_dim=dim, 
+        reduce_factor = reduce_factor
+    )
     
     best_val = -float("inf")
     best_epoch = -1
@@ -87,10 +92,10 @@ def trainCausalNN(
     # Train model on dataset
     for i in range(int(epochs_total / epochs_to_save)):
         # callback to save every epoch with global epoch number
-        save_all = tf.keras.callbacks.ModelCheckpoint(
-            filepath=f"{file_identifier_out}_epoch{{epoch:04d}}.keras",
-            save_best_only=False
-        )
+        # save_all = tf.keras.callbacks.ModelCheckpoint(
+        #     filepath=f"{file_identifier_out}_epoch{{epoch:04d}}.keras",
+        #     save_best_only=False
+        # )
         
         # callback to save best model separately
         save_best = tf.keras.callbacks.ModelCheckpoint(
@@ -106,7 +111,7 @@ def trainCausalNN(
             class_weight=class_weight,
             epochs=global_epoch + epochs_to_save,  # end epoch number
             initial_epoch=global_epoch,            # start epoch number
-            callbacks=[save_all, save_best, TqdmCallback(verbose=1)],
+            callbacks=[save_best, TqdmCallback(verbose=1)],
             verbose="0"
         ))
         

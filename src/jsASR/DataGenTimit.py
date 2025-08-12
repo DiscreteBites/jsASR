@@ -44,7 +44,8 @@ class DataGenerator(tf.keras.utils.Sequence):
         ''' batches per epoch '''
         return int(np.floor(len(self.idx) / self.batch_size / self.reduce_factor))
     
-    def __getitem__(self, index) -> Tuple[NDArray[Any], NDArray[Any] | list[NDArray[Any]]]:       
+    # Type signature of NDarray, dict, dict overload for tri-phoneme generator
+    def __getitem__(self, index) -> Tuple[NDArray[Any], NDArray[Any]] | Tuple[NDArray[Any],Tuple[NDArray, NDArray, NDArray], Tuple[NDArray, NDArray, NDArray]]:       
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size] # Generate indexes of the batch        
         list_idx_temp = [self.idx[k] for k in indexes if k != -1] # Find list of IDs
         X, Y = self.__data_generation(list_idx_temp)
