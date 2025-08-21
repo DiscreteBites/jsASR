@@ -33,17 +33,20 @@ def predictPhonemeProbabilitiesCausalNN(
     data_split = int( data_split_factor * len(idx))
     idx_val   = idx[data_split:]
     
-    print('evaluating and predicting... this will take a while')
     model = cast(Model, tf.keras.models.load_model( model_name + '.keras'))
-
+        
     predict_generator = DataGenerator(
         idx = idx_val, X=X, Y=Y, out_dim = dim, 
         reduce_factor = 1, shuffle = False
     )
+
+    print("Evaluating...")
     evaluation = model.evaluate(predict_generator, verbose="1", return_dict=True)
+
+    print("Predicting...")
     p = model.predict(predict_generator, verbose="1")
 
-    idx_valed = np.array(idx_val)[np.array(range(len(p)))] + num_timesteps
+    idx_validated = np.array(idx_val)[np.array(range(len(p)))] + num_timesteps
     
     # safe log
     eps = 1e-12
@@ -51,10 +54,11 @@ def predictPhonemeProbabilitiesCausalNN(
     np.save( file_identifier_out + '_logp.npy', logp)
     
     y_pred = np.argmax(p,axis=1)
-    y_true = Y[idx_valed]
+    y_true = Y[idx_validated]
     pred_correct = sum( ( np.logical_or( y_pred[:-8] == y_true[:-8], y_pred[8:] == y_true[:-8]  ) ) ) / (len(y_pred)-8)
+    
     np.save( file_identifier_out + '_Phonemes39_pred.npy', y_pred)
-    np.save( file_identifier_out + '_Phonemes39_true.npy',y_true)
+    np.save( file_identifier_out + '_Phonemes39_true.npy', y_true)
     
     print(evaluation)   
     print(pred_correct)
@@ -70,13 +74,16 @@ def combineModelCausalNN(
         filename_X = filename_X1, filename_Y = filename_Y, model_name = model_name_1, 
         file_identifier_out=f'{file_identifier_out}_1', data_split_factor = 0
     )
-    logp_1  = np.load( f'{file_identifier_out}_1' + '_logp.npy')
+    logp_1  = np.load( f'{file_identifier_out}_1' + '_logp.npy' )
     
-    predictPhonemeProbabilitiesCausalNN(
-        filename_X = filename_X2, filename_Y = filename_Y, model_name = model_name_2,
-        file_identifier_out=f'{file_identifier_out}_2', data_split_factor = 0
-    )
-    logp_2  = np.load( f'{file_identifier_out}_2' + '_logp.npy')
+    if filename_X1 == filename_X2:
+        logp_2 = np.load( f'{file_identifier_out}_1' + '_logp.npy' )
+    else:
+        predictPhonemeProbabilitiesCausalNN(
+            filename_X = filename_X2, filename_Y = filename_Y, model_name = model_name_2,
+            file_identifier_out=f'{file_identifier_out}_2', data_split_factor = 0
+        )
+        logp_2  = np.load( f'{file_identifier_out}_2' + '_logp.npy')
     
     logp = logp_1 + logp_2
     np.save( file_identifier_out + '_logp_combined_all.npy', logp)

@@ -42,18 +42,21 @@ def predictPhonemeProbabilitiesNonCausalNN(
     num_features = X.shape[1]
     num_timesteps = 305
     dim          = ( batch_size, num_timesteps, num_features )
-    
+
     data_split = int( data_split_factor * len(idx))
     idx_val   = idx[data_split:]
     
-    print('evaluating and predicting... this will take a while')
     model = cast(Model, tf.keras.models.load_model( model_name + '.keras' ))
     
     predict_generator = DataGeneratorTri(
         idx=idx_val, X=X, Y=Y, out_dim=dim, cw_dict=cw_dict, 
         reduce_factor = 1,non_causal_steps = int(num_timesteps/2), shuffle = False
     )
+    
+    print("Evaluating...")
     evaluation = model.evaluate(predict_generator, verbose="1", return_dict=True)
+
+    print("Predicting...")
     p = model.predict(predict_generator, verbose="1")
     
     p_prev = p[0]
